@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+    <<audio id="musica" autoplay loop>
+    <source src="congratulations.mp3" type="audio/mpeg">
+</audio>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Antu</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffe5ec 0%, #ffcad4 100%);
+            color: #4a4a4a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Corazones de fondo animados */
+        .heart-bg {
+            position: absolute;
+            color: rgba(255, 133, 161, 0.3);
+            font-size: 24px;
+            animation: float 6s linear infinite;
+            bottom: -50px;
+            z-index: 1;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Contenedor del reproductor de YouTube (Discreto) */
+        .music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            z-index: 100;
+            border: 1px solid #ffccd5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .music-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #ff4d6d;
+        }
+
+        /* El iframe se mantiene visible pero muy pequeño y estético */
+        #yt-player {
+            border-radius: 8px;
+            border: none;
+            width: 130px;
+            height: 40px;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 35px 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(214, 93, 123, 0.2);
+            max-width: 420px;
+            width: 90%;
+            backdrop-filter: blur(5px);
+            z-index: 10;
+            transition: all 0.5s ease;
+            margin: 20px 0;
+        }
+
+        h1 {
+            color: #ff4d6d;
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            line-height: 1.6;
+            font-size: 16px;
+            color: #5c5556;
+            margin-bottom: 20px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 25px;
+            height: 60px;
+            position: relative;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        #btn-si {
+            background-color: #ff4d6d;
+            color: white;
+        }
+
+        #btn-si:hover {
+            background-color: #ff758f;
+            transform: scale(1.05);
+        }
+
+        #btn-no {
+            background-color: #ffccd5;
+            color: #ff4d6d;
+            position: relative;
+        }
+
+        /* Sección oculta de horarios */
+        .horarios {
+            display: none;
+            margin-top: 25px;
+            border-top: 2px dashed #ffccd5;
+            padding-top: 20px;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cajas de opciones de tiempo interactivas */
+        .time-box {
+            background-color: #fff0f3;
+            border: 1px solid #ffb3c1;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 12px 0;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            position: relative;
+        }
+
+        .time-box:hover {
+            transform: translateY(-2px);
+            border-color: #ff4d6d;
+            background-color: #ffe5ec;
+            box-shadow: 0 4px 12px rgba(255, 77, 109, 0.1);
+        }
+
+        .time-box.selected {
+            background-color: #ff4d6d;
+            color: white !important;
+            border-color: #ff4d6d;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
+        }
+
+        .time-box.selected strong, 
+        .time-box.selected .time-details {
+            color: white;
+        }
+
+        .time-details {
+            color: #7a6f71;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* Botón de WhatsApp inicializado oculto */
+        .btn-whatsapp {
+            display: none;
+            margin-top: 20px;
+            padding: 14px 24px;
+            background-color: #25D366;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 15px;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+            transition: all 0.3s ease;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .btn-whatsapp:hover {
+            background-color: #1ebd58;
+            transform: scale(1.03);
+            box-shadow: 0 6px 16px rgba(37, 211, 102, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="music-control">
+        <span class="music-title">🎵 Mac Miller - Congratulations</span>
+        <iframe id="yt-player" 
+                src="https://www.youtube.com/embed/JoCH2_BMeEw?enablejsapi=1&loop=1&playlist=JoCH2_BMeEw" 
+                allow="autoplay">
+        </iframe>
+    </div>
+
+    <div class="container" id="main-card">
+        <h1>Hola, Antu</h1>Se q no queirs hablar conmigo y todo eso pero enverdad quiero hablar contigo en llamada porfavor estoy organizando todo para decirte
+        <p></p>
+        
+        <div class="btn-container">
+            <button class="btn" id="btn-si" onclick="aceptarLlamada()">Si go llamada</button>
+            <button class="btn" id="btn-no" onmouseover="moverBotonNo()" onclick="achicarBotonNo()">mmmmm si'nt</button>
+        </div>
+
+        <div class="horarios" id="seccion-horarios">
+            <h3>ya sabia q dirias q si</h3>
+            <p>Bueno ahora pues elige cual de las dos opciones es mejor la A es un poco mrd</p>
+            
+            <div class="time-box" id="opt-tarde" onclick="seleccionarHora('Tarde (PE 4:00 PM / ES 11:00 PM)', 'opt-tarde')">
+                <strong>Opción A</strong>
+                <span class="time-details">A las 8 o por ahi </span>
+            </div>
+            
+            <div class="time-box" id="opt-noche" onclick="seleccionarHora('Noche (PE 6:00 PM / ES 1:00 AM)', 'opt-noche')">
+                <strong>Opcion B</strong>
+                <span class="time-details">Dime por wp cuando</span>
+            </div>
+            
+            <p style="font-size: 14px; font-style: italic; margin-top: 15px;">Presiona primero uno de los dos para enviar el mensaje</p>
+            
+            <a href="#" id="whatsapp-link" target="_blank" class="btn-whatsapp">Confirmar por WhatsApp 💬</a>
+        </div>
+    </div>
+
+    <script>
+        // Pon aquí tu número de teléfono con el código de tu país sin el signo '+' (Ejemplo Perú: 51999888777)
+        const tuTelefono = "34603935257"; 
+
+        // Función para enviar comando de Play al Iframe de YouTube
+        function reproducirMusica() {
+            const iframe = document.getElementById('yt-player');
+            // Enviamos un mensaje interno al reproductor para que inicie
+            iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+        }
+
+        // Crear corazones flotantes de fondo automáticamente
+        function crearCorazones() {
+            for (let i = 0; i < 15; i++) {
+                let heart = document.createElement('div');
+                heart.className = 'heart-bg';
+                heart.innerHTML = '❤️';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDelay = Math.random() * 5 + 's';
+                heart.style.fontSize = Math.random() * (30 - 15) + 15 + 'px';
+                document.body.appendChild(heart);
+            }
+        }
+        crearCorazones();
+
+        let clicksEnNo = 0;
+
+        function moverBotonNo() {
+            const btnNo = document.getElementById('btn-no');
+            if (clicksEnNo < 4) {
+                const x = Math.random() * (window.innerWidth - btnNo.offsetWidth) - (window.innerWidth/3);
+                const y = Math.random() * (window.innerHeight - btnNo.offsetHeight) - (window.innerHeight/3);
+                
+                btnNo.style.position = 'absolute';
+                btnNo.style.left = Math.abs(x) % 150 + 'px';
+                btnNo.style.top = Math.abs(y) % 50 + 'px';
+            }
+        }
+
+        function achicarBotonNo() {
+            clicksEnNo++;
+            const btnNo = document.getElementById('btn-no');
+            const btnSi = document.getElementById('btn-si');
+            
+            let nuevoTamanoNo = 16 - (clicksEnNo * 3);
+            let nuevoTamanoSi = 16 + (clicksEnNo * 4);
+            
+            if (nuevoTamanoNo > 6) {
+                btnNo.style.fontSize = nuevoTamanoNo + 'px';
+                btnNo.style.padding = (12 - clicksEnNo*2) + 'px ' + (30 - clicksEnNo*4) + 'px';
+                btnSi.style.fontSize = nuevoTamanoSi + 'px';
+            } else {
+                btnNo.style.display = 'none';
+            }
+        }
+
+        function aceptarLlamada() {
+             document.getElementById('btn-no').style.display = 'none';
+             document.getElementById('btn-si').style.display = 'none';
+             document.getElementById('seccion-horarios').style.display = 'block';
+                 document.getElementById('musica').play();
+                }
+
+        function seleccionarHora(textoHora, elementoId) {
+            document.getElementById('opt-tarde').classList.remove('selected');
+            document.getElementById('opt-noche').classList.remove('selected');
+            document.getElementById(elementoId).classList.add('selected');
+
+            const mensajeOriginal = `OYE IDIOTA aqui pues tienes q borrar esto y poner tu mensaje p ajksdakjs`;
+            const mensajeCodificado = encodeURIComponent(mensajeOriginal);
+            
+            const whatsappBtn = document.getElementById('whatsapp-link');
+            whatsappBtn.href = `https://wa.me/${tuTelefono}?text=${mensajeCodificado}`;
+            whatsappBtn.style.display = 'inline-block';
+        }
+    </script>
+</body>
+</html>
